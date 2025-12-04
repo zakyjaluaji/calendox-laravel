@@ -1,0 +1,13 @@
+{
+    "require": {
+        "google/apiclient": "^2.15"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
+        "preferred-install": "dist",
+        "sort-packages": true
+    },
+    "prefer-stable": true
+}

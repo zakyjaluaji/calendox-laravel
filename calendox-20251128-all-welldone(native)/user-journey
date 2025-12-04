@@ -1,0 +1,74 @@
+# CalendoX — User Journey
+
+## Gambaran Umum
+- Target: Pengelola/Admin dan Tamu (Guest) untuk mengelola/meninjau appointment.
+- Titik masuk: `login.php` (form), SSO via `proseslogin.php?akun=<email>`, akses langsung `index.php` jika sesi aktif.
+- Lingkungan: Server PHP built-in di `http://127.0.0.1:8080/`, sesi di `sessions/`, lampiran di `uploads/appointments/<appointment_id>/`.
+
+## Person
+- Pengelola/Admin: Membuat/ubah/hapus appointment, unggah lampiran, kelola peserta, sinkronisasi Google Calendar.
+- Tamu/Guest: Melihat kalender, detail appointment; akses terbatas untuk modifikasi.
+- Pengguna SSO: Login melalui parameter `akun`, role diambil dari tabel `akun_akses`.
+
+## Journey 1: Login & Sesi
+- Trigger: Pengguna membuka `login.php` atau SSO `proseslogin.php?akun=<email>`.
+- Tindakan: Isi username/password atau login via SSO.
+- Sistem: Inisialisasi sesi (`session_name`, `session.save_path`), validasi kredensial/akses, set `$_SESSION['username']` dan `role`.
+- Hasil sukses: Redirect ke `index.php` dengan sesi aktif.
+- Edge case: Kredensial salah → `login.php?error=1` toast error muncul.
+
+## Journey 2: Melihat Kalender
+- Trigger: Sesi aktif mengakses `index.php`.
+- Tindakan: Sistem memuat event dari `calendar.php` (judul, waktu, PIC, warna, lampiran, peserta).
+- Sistem: Render grid kalender dengan waktu, judul, PIC, dan waktu.
+- Hasil sukses: Pengguna memindai appointment secara visual; warna konsisten; tangal hari ini terdapat tanda khusus.
+- Edge case: Event overlap → tetap ditampilkan dengan gaya yang jelas.
+
+## Journey 3: Membuat appointment
+- Trigger: Klik tambah appointment pada UI `index.php`.
+- Tindakan: Isi `title`, `pic_name`, tanggal/waktu, pilih warna, unggah lampiran.
+- Sistem: Simpan ke DB `appointments`, letakkan file di `uploads/appointments/<appointment_id>/`, buat URL relatif lampiran, validasi warna terhadap whitelist pastel.
+- Hasil sukses: Event muncul di grid; link lampiran dapat diklik di event box dan modal.
+- Edge case: Gagal unggah file → tampilkan pesan; warna tidak valid → fallback ke pastel default.
+
+## Journey 4: Lampiran
+- Trigger: Event memiliki `attachment_filename`.
+- Tindakan: Klik ikon/link lampiran pada event box atau di modal.
+- Sistem: Gunakan URL relatif dari domain/port aktif (`uploads/appointments/<appointment_id>/<filename>`), tidak bergantung `localhost:8080`.
+- Hasil sukses: Lampiran dibuka di tab baru atau diunduh.
+- Edge case: File hilang/izin tidak cukup → tampilkan error; periksa path dan permission folder.
+
+## Journey 5: Peserta appointment
+- Trigger: Pengguna membuka modal peserta dari event.
+- Tindakan: Lihat daftar peserta (`participants.php?action=list_participants&appointment_id=...`), tambah/hapus peserta.
+- Sistem: Update DB `participant`; hitung `participant_count` dan render pada modal.
+- Hasil sukses: Jumlah peserta akurat; data peserta di modal sinkron.
+- Edge case: Koneksi DB gagal → tampilkan error dan opsi retry; validasi input nama/email.
+
+## Journey 6: Tambah Peserta
+- Trigger: Cari Peserta (endpoint di file `cari-pic.php`).
+- Tindakan: Masukkan kata kunci PIC, bisa berupa nama atau email.
+- Sistem: Query data dan render hasil sesuai filter.
+- Hasil sukses: Fokus cepat pada event relevan.
+- Edge case: Hasil kosong → tampilkan status kosong; pastikan UX filter jelas.
+
+## Journey 7: Sinkronisasi Google Calendar
+- Trigger: Pengguna klik sinkronisasi (Two-Way Sync).
+- Tindakan: Autentikasi Google (`google-auth.php`), cek token, jalankan `sync_to_google.php` atau `sync_two_way.php`.
+- Sistem: Kirim event ke Google, sertakan `attachmentUrl` di deskripsi, simpan `google_event_id`.
+- Hasil sukses: Event muncul/ter-update di Google Calendar.
+- Edge case: Token kedaluwarsa → minta re-auth; konflik waktu → tampilkan catatan.
+
+## Journey 8: Edit/Hapus appointment
+- Trigger: Klik event untuk edit/hapus.
+- Tindakan: Ubah waktu/judul/PIC/warna/lampiran; konfirmasi hapus jika diperlukan.
+- Sistem: Update DB, hapus lampiran jika dipilih, refresh tampilan, sinkronkan perubahan ke Google bila relevan.
+- Hasil sukses: Perubahan tercermin di grid dan integrasi terkait.
+- Edge case: Menghapus event berlampiran → tangani file dengan aman; konsistensi di Google.
+
+## Journey 9: Logout
+- Trigger: Klik logout di UI.
+- Tindakan: `logout.php` bersihkan sesi dan cookie, redirect ke `login.php`.
+- Sistem: `session_destroy`, hapus cookie `session_name` dengan parameter secure/httponly.
+- Hasil sukses: Sesi berakhir, kembali ke halaman login.
+- Edge case: Cookie tidak terhapus → cek domain/path; lakukan refresh manual.

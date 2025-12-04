@@ -1,0 +1,40 @@
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.env.local
+.env.*.local
+
+# PHP/Laravel
+/vendor/
+node_modules/
+.env
+.env.backup
+.env.*.backup
+
+# Session files
+/sessions/*
+!sessions/.gitkeep
+
+# Uploads
+/uploads/*
+!uploads/.gitkeep
+
+# Temporary files
+*.log
+*.tmp
+*.cache
+
+# Composer
+composer.phar
+composer.lock (optional - keep if you want to lock versions)
+
+# NPM
+package-lock.json
+
+# OS
+Thumbs.db
+.DS_Store

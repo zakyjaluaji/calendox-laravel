@@ -1,0 +1,579 @@
+:root {
+    --primary: #3B82F6;
+    --primary-light: #DBEAFE;
+    --primary-dark: #1E3A8A;
+    --background: #F9FaFB;
+    --success: #d1fae5;
+    --success-text: #065f46;
+    --error: #fee2e2;
+    --error-text: #b91c1c;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background-color: var(--background);
+    color: #333;
+    line-height: 1.6;
+}
+
+header {
+    background-color: var(--primary);
+    color: white;
+    padding: 0.75rem 1rem;
+    text-align: center;
+}
+
+/* Header layout with left toggle and right logout */
+.header-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.header-left, .header-right { display: flex; align-items: center; gap: 8px; }
+
+/* Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 32px;  /* smaller width */
+    height: 18px; /* smaller height */
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: #ccc;
+    transition: .2s;
+    border-radius: 24px;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px; /* smaller knob */
+    left: 2px; top: 2px;
+    background: white;
+    transition: .2s;
+    border-radius: 50%;
+}
+.switch input:checked + .slider { background: var(--primary-dark); }
+.switch input:checked + .slider:before { transform: translateX(14px); }
+
+/* Logout icon button */
+.logout-btn {
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 12px;
+    padding: 2px 6px;
+    cursor: pointer;
+}
+.logout-btn:hover { opacity: 0.85; }
+
+/* Dark mode overrides */
+body.dark {
+    background-color: #0f172a;
+    color: #e5e7eb;
+}
+body.dark header { background-color: #1f2937; }
+body.dark .calendar {
+    background-color: #111827;
+    color: #e5e7eb;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+body.dark .day {
+    background: #1f2937;
+    border-color: #374151;
+}
+body.dark .day:hover { background: #374151; }
+/* Dark mode highlight untuk hari "today" */
+body.dark .day.today {
+    background: rgba(59, 130, 246, 0.18); /* primary dengan transparansi */
+    border-color: var(--primary);
+}
+body.dark .day.today:hover {
+    background: rgba(59, 130, 246, 0.28);
+}
+body.dark .modal-content {
+    background-color: #111827;
+    color: #e5e7eb;
+    border: 1px solid #334155;
+}
+body.dark .overlay-btn { background: #1E3A8A; }
+
+/* Dark mode: header tabel pada modal Data Peserta */
+body.dark #participantDataModal thead tr {
+    background: #1f2937 !important; /* slate-800 */
+}
+body.dark #participantDataModal thead th {
+    color: #e5e7eb !important;      /* gray-200 */
+    border-color: #f1f1f1 !important; /* slate-700 */
+}
+
+/* Clock */
+
+.clock-container {
+    background-color: var(--primary-light);
+    color: var(--primary-dark);
+    font-size: 2rem;
+    font-weight: bold;
+    padding: 1rem;
+    text-align: center;
+    font-family: "Inter", sans-serif;
+    letter-spacing: 2px;
+    border-bottom: 2px solid var(--primary);
+}
+
+@media (max-width: 768px) {
+    .clock-container {
+        font-size: 1.4rem;
+        padding: 0.75rem;
+    }
+}
+
+/* Calenar Contantion */
+
+.calendar {
+    max-width: 1000px;
+    margin: 2rem auto;
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.nav-btn-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.nav-btn {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--primary-dark)
+}
+
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+
+/* Mobile (Grid) */
+@media (max-width: 1024px) {
+    .calendar-grid {
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 10px;
+    }
+
+    .day, .day-name {
+        min-width: 140px;
+        flex-shrink: 0;
+        scroll-snap-align: start;
+    }
+}
+
+
+.day, .day-name {
+    text-align: center;
+}
+
+
+.day {
+    background: #FFF;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    min-height: 100px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.day:hover {
+    background: #f3f4f6;
+}
+
+.day.today {
+    background: var(--primary-light);
+    border-color: var(--primary-dark)
+}
+
+.date-number {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.event {
+    background-color: var(--primary);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin-top: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.15s ease;
+}
+
+.event:hover {
+    transform: scale(1.02);
+}
+
+.event .course {
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.event .instructor {
+    font-size: 12px;
+    opacity: 0.85;
+}
+
+.event .time {
+    font-size: 12px;
+    margin-top: 3px;
+    color: #f3f3f3;
+}
+
+.event-meta {
+    font-size: 12px;
+    color: #EEF;
+    line-height: 1.2;
+}
+
+/* Alert Boxes */
+
+.alert {
+    max-width: 600px;
+    margin: 1rem auto;
+    padding: 1rem;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.success {
+    background: var(--success);
+    color: var(--success-text);
+}
+
+.error {
+    background: var(--error);
+    color: var(--error-text);
+}
+
+/* Modal Popup */
+
+.modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+}
+
+/* Pastikan modal Data Peserta berada di bawah Kelola Peserta saat keduanya terbuka */
+#participantDataModal {
+    z-index: 9998;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    max-width: 420px;
+    width: 100%;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    position: relative;
+    overflow: visible; /* ensure autocomplete menu isn't clipped */
+}
+
+/* Lebarkan modal Data Peserta menjadi 70% responsif */
+#participantDataModal .modal-content {
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Scrollable content khusus untuk modal Tambah/Ubah Event */
+#eventModal .modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+
+
+.modal-content label {
+    display: block;
+    font-weight: bold;
+    margin-top: 1rem;
+    margin-bottom: 6px;
+}
+
+.modal-content input, select {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #CCC;
+    border-radius: 5px;
+}
+
+.modal-content button {
+    margin-top: 1rem;
+    padding: 10px;
+    width: 100%;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Spacing khusus untuk modal Kelola Peserta */
+#participantModal #participantName {
+    margin-bottom: 12px;
+}
+
+.modal-content button[type="submit"] {
+    background-color: var(--primary);
+    color: white;
+}
+
+/* jQuery UI Autocomplete menu should appear above modal overlay */
+.ui-autocomplete {
+    z-index: 10000 !important; /* higher than .modal (9999) */
+    max-height: 240px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.submit-btn {
+    background-color: crimson;
+    color: #FFF;
+}
+
+.modal-content button:last-child {
+    background-color: #e5e7eb;
+    color: #333;
+}
+
+/* Actions row and table wrapper spacing for Participant Data modal */
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-top: 4px;
+    margin-bottom: 24px; /* spacing before table */
+}
+
+.table-wrapper {
+    margin-top: 24px; /* spacing after actions */
+    overflow: auto;
+    max-height: 50vh;
+}
+
+/* Reduce gap below event combobox specifically in Data Peserta modal */
+#participantDataEventSelector {
+    margin-bottom: 4px;
+}
+
+
+/* DropDown for multiple events */
+
+#eventSelector, #participantEventSelector, #participantDataEventSelector {
+    width: 100%;
+    padding: 10px;
+    font-size: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+    border: 1px solid #CCC;
+}
+
+/* Override: samakan jarak combobox event di semua modal menjadi 4px */
+#eventSelector { margin-bottom: 4px; }
+#participantEventSelector { margin-bottom: 4px; }
+
+/* 
+✅ Overlay Button CSS Logic
+
+*/
+
+.day-overlay {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2;
+}
+
+.day:hover .day-overlay {
+    display: flex;
+}
+
+.overlay-btn {
+    background: var(--primary-dark);
+    color: white;
+    padding: 4px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+/* Small icon button, suitable for table actions */
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    border: 1px solid #ddd;
+    background: #f9fafb;
+    color: #111;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete-participant-btn {
+    background: #fee2e2; /* light red */
+    border-color: #fca5a5;
+}
+
+.overlay-btn:hover {
+    background: var(--primary);
+}
+
+/* Toast Notifications */
+.toast-container {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 10001;
+}
+
+.toast {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    color: #111;
+    background: #fff;
+    border-left: 4px solid #999;
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+
+.toast-success { border-left-color: #10b981; }
+.toast-error { border-left-color: #ef4444; }
+.toast-info { border-left-color: #3b82f6; }
+
+/* Centered header title and small role label */
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.role-label {
+  font-size: 12px;
+  color: rgba(255,255,255,0.9);
+  margin-top: 2px;
+}
+
+body.dark .role-label {
+  color: #e5e7eb;
+}
+
+/* Tambahan: dark mode untuk halaman login */
+body.dark .login-container {
+  background-color: #111827;
+  color: #e5e7eb;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+body.dark .login-form label {
+  color: #e5e7eb;
+}
+
+body.dark .login-form input {
+  background: #1f2937;
+  border-color: #374151;
+  color: #e5e7eb;
+}
+
+body.dark .login-form button {
+  background: var(--primary-dark);
+  color: #fff;
+}
+
+body.dark .login-hint {
+  color: #9ca3af;
+}
+
+body.dark .login-error {
+  color: #fecaca;
+  background: #7f1d1d;
+  border-color: #b91c1c;
+}
+
+/* Preview lampiran: warna link lebih terang saat dark mode */
+body.dark #attachmentPreviewLink {
+  color: #e5e7eb !important; /* gray-200 */
+}
+
+/* Preview lampiran: kerapihan gaya link */
+#attachmentPreviewLink {
+  background: transparent;
+  color: #111;
+  text-decoration: none;
+  font-size: 16px;
+}
+
+#attachmentPreviewLink:hover {
+  text-decoration: none;
+  opacity: 0.85;
+}
+
